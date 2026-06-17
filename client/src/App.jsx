@@ -58,7 +58,7 @@ export default function App() {
               <h3 className="model-info-title">Sobre el modelo</h3>
               <div className="model-stats-grid">
                 <div className="model-stat">
-                  <span className="model-stat-value">85.3%</span>
+                  <span className="model-stat-value">89.9%</span>
                   <span className="model-stat-label">Exactitud (Test)</span>
                 </div>
                 <div className="model-stat">
