@@ -3,47 +3,47 @@ import React, { useState } from "react";
 // Valores iniciales del formulario
 const INITIAL_STATE = {
   Age: "",
-  Sex: "1",
-  ChestPainType: "0",
+  Sex: "M",
+  ChestPainType: "ASY",
   RestingBP: "",
   Cholesterol: "",
   FastingBS: "0",
-  RestingECG: "1",
+  RestingECG: "Normal",
   MaxHR: "",
-  ExerciseAngina: "0",
+  ExerciseAngina: "N",
   Oldpeak: "",
-  ST_Slope: "2",
+  ST_Slope: "Flat",
 };
 
 // Definición de campos select con sus opciones
 const SELECT_OPTIONS = {
   Sex: [
-    { value: "0", label: "Femenino" },
-    { value: "1", label: "Masculino" },
+    { value: "F", label: "Femenino" },
+    { value: "M", label: "Masculino" },
   ],
   ChestPainType: [
-    { value: "0", label: "ASY — Asintomático" },
-    { value: "1", label: "ATA — Angina Atípica" },
-    { value: "2", label: "NAP — Dolor No Anginoso" },
-    { value: "3", label: "TA — Angina Típica" },
+    { value: "ASY", label: "ASY — Asintomático" },
+    { value: "ATA", label: "ATA — Angina Atípica" },
+    { value: "NAP", label: "NAP — Dolor No Anginoso" },
+    { value: "TA", label: "TA — Angina Típica" },
   ],
   FastingBS: [
     { value: "0", label: "No (≤ 120 mg/dl)" },
     { value: "1", label: "Sí (> 120 mg/dl)" },
   ],
   RestingECG: [
-    { value: "0", label: "LVH — Hipertrofia Ventricular Izq." },
-    { value: "1", label: "Normal" },
-    { value: "2", label: "ST — Anomalía Onda ST-T" },
+    { value: "LVH", label: "LVH — Hipertrofia Ventricular Izq." },
+    { value: "Normal", label: "Normal" },
+    { value: "ST", label: "ST — Anomalía Onda ST-T" },
   ],
   ExerciseAngina: [
-    { value: "0", label: "No" },
-    { value: "1", label: "Sí" },
+    { value: "N", label: "No" },
+    { value: "Y", label: "Sí" },
   ],
   ST_Slope: [
-    { value: "0", label: "Down — Descendente" },
-    { value: "1", label: "Flat — Plana" },
-    { value: "2", label: "Up — Ascendente" },
+    { value: "Down", label: "Down — Descendente" },
+    { value: "Flat", label: "Flat — Plana" },
+    { value: "Up", label: "Up — Ascendente" },
   ],
 };
 
@@ -84,19 +84,20 @@ export default function PredictionForm({ onSubmit, isLoading }) {
       return;
     }
 
-    // Conversión de tipos según el esquema Pydantic del backend
+    // Enviamos los valores en su forma original (strings + números)
+    // api.js se encarga de construir las 16 features del modelo
     onSubmit({
-      Age: parseInt(formData.Age),
-      Sex: parseInt(formData.Sex),
-      ChestPainType: parseInt(formData.ChestPainType),
-      RestingBP: parseInt(formData.RestingBP),
-      Cholesterol: parseInt(formData.Cholesterol),
-      FastingBS: parseInt(formData.FastingBS),
-      RestingECG: parseInt(formData.RestingECG),
-      MaxHR: parseInt(formData.MaxHR),
-      ExerciseAngina: parseInt(formData.ExerciseAngina),
-      Oldpeak: parseFloat(formData.Oldpeak),
-      ST_Slope: parseInt(formData.ST_Slope),
+      Age:            parseInt(formData.Age),
+      Sex:            formData.Sex,
+      ChestPainType:  formData.ChestPainType,
+      RestingBP:      parseInt(formData.RestingBP),
+      Cholesterol:    parseInt(formData.Cholesterol),
+      FastingBS:      parseInt(formData.FastingBS),
+      RestingECG:     formData.RestingECG,
+      MaxHR:          parseInt(formData.MaxHR),
+      ExerciseAngina: formData.ExerciseAngina,
+      Oldpeak:        parseFloat(formData.Oldpeak),
+      ST_Slope:       formData.ST_Slope,
     });
   };
 
