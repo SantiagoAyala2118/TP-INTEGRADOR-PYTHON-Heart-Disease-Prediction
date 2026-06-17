@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import joblib
 import numpy as np
+import pandas as pd  # <--- Agregado para armar el DataFrame estructurado
 import os
 
 app = FastAPI(
@@ -92,34 +93,49 @@ def predict(data: PredictionInput):
         raise HTTPException(status_code=503, detail="Modelo no disponible.")
 
     try:
-        # Construir la matriz respetando estrictamente las 15 columnas del escalador
-        raw_features = np.array([[
-            data.Age,
-            data.RestingBP,
-            data.Cholesterol,
-            data.FastingBS,
-            data.MaxHR,
-            data.Oldpeak,
-            data.Sex_M,
-            data.ChestPainType_ATA,
-            data.ChestPainType_NAP,
-            data.ChestPainType_TA,
-            data.RestingECG_Normal,
-            data.RestingECG_ST,
-            data.ExerciseAngina_Y,
-            data.ST_Slope_Flat,
-            data.ST_Slope_Up,
-        ]])
+        # 1. Definimos el orden estricto de columnas que el escalador aprendió en la notebook
+        columns_order = [
+            "Age", "RestingBP", "Cholesterol", "FastingBS", "MaxHR", "Oldpeak", "Sex_M",
+            "ChestPainType_ATA", "ChestPainType_NAP", "ChestPainType_TA",
+            "RestingECG_Normal", "RestingECG_ST", "ExerciseAngina_Y", "ST_Slope_Flat", "ST_Slope_Up"
+        ]
 
-        # Escalar los datos usando las 15 columnas correctas
+        # 2. Mapeamos los datos entrantes a un diccionario estructurado
+        raw_data_dict = {
+            "Age": [data.Age],
+            "RestingBP": [data.RestingBP],
+            "Cholesterol": [data.Cholesterol],
+            "FastingBS": [data.FastingBS],
+            "MaxHR": [data.MaxHR],
+            "Oldpeak": [data.Oldpeak],
+            "Sex_M": [data.Sex_M],
+            "ChestPainType_ATA": [data.ChestPainType_ATA],
+            "ChestPainType_NAP": [data.ChestPainType_NAP],
+            "ChestPainType_TA": [data.ChestPainType_TA],
+            "RestingECG_Normal": [data.RestingECG_Normal],
+            "RestingECG_ST": [data.RestingECG_ST],
+            "ExerciseAngina_Y": [data.ExerciseAngina_Y],
+            "ST_Slope_Flat": [data.ST_Slope_Flat],
+            "ST_Slope_Up": [data.ST_Slope_Up]
+        }
+        
+        # 3. Construimos el DataFrame con las columnas identificadas (Adiós UserWarning 👋)
+        df_features = pd.DataFrame(raw_data_dict, columns=columns_order)
+
+        # 4. Escalar las características de forma prolija
         if scaler is not None:
-            scaled_features = scaler.transform(raw_features)
+            scaled_features = scaler.transform(df_features)
         else:
-            scaled_features = raw_features
+            scaled_features = df_features.to_numpy()
 
-        # Realizar la predicción
-        prediction = int(model.predict(scaled_features)[0])
-        probability = float(model.predict_proba(scaled_features)[0][1])
+        # 5. Realizar la predicción numérica y probabilística
+        raw_prediction = model.predict(scaled_features)[0]
+        raw_probability = model.predict_proba(scaled_features)[0][1]
+        
+        # 6. Forzamos el casteo a tipos primitivos nativos de Python (Adiós Error 500 🚀)
+        prediction = int(raw_prediction)
+        probability = float(raw_probability)
+        
         label = "Enfermedad cardíaca detectada" if prediction == 1 else "Sin enfermedad cardíaca"
 
         return PredictionOutput(
