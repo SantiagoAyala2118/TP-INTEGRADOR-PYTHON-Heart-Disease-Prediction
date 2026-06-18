@@ -30,17 +30,17 @@ model_load_error = None
 # --- Carga del Modelo y del Escalador ---
 try:
     model = joblib.load(MODEL_PATH)
-    print(f"✅ Modelo cargado correctamente")
+    print("Modelo cargado correctamente")
     
     if os.path.exists(SCALER_PATH):
         scaler = joblib.load(SCALER_PATH)
-        print(f"✅ Escalador cargado correctamente")
+        print("Escalador cargado correctamente")
     else:
-        print(f"⚠️ Alerta: No se encontró el archivo del escalador en {SCALER_PATH}.")
+        print(f"Alerta: No se encontró el archivo del escalador en {SCALER_PATH}.")
 
 except Exception as e:
     model_load_error = str(e)
-    print(f"❌ Error al inicializar los componentes: {e}")
+    print(f"Error al inicializar los componentes: {e}")
 
 
 # Pydantic model adecuado a las 15 columnas que espera el backend
